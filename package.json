@@ -9,7 +9,7 @@
     "dev": "node --watch server.js",
     "start-server": "node server.js",
     "desktop": "electron .",
-    "dist": "electron-builder --win nsis"
+    "dist": "electron-builder --win nsis --publish never"
   },
   "engines": {
     "node": ">=22 <23"
