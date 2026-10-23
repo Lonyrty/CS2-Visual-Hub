@@ -2,7 +2,7 @@
   "name": "cs2-visual-hub-stripe",
   "version": "1.0.0",
   "private": true,
-  "description": "CS2 Visual Hub with Stripe Checkout and verified webhooks",
+  "description": "CS2 Visual Hub website and Windows companion overlay",
   "main": "desktop.js",
   "scripts": {
     "start": "node server.js",
@@ -11,7 +11,9 @@
     "desktop": "electron .",
     "dist": "electron-builder --win nsis"
   },
-  "engines": { "node": ">=22 <23" },
+  "engines": {
+    "node": ">=22 <23"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "connect-sqlite3": "^0.9.15",
@@ -30,10 +32,29 @@
   "build": {
     "appId": "com.lonyrty.cs2visualhub",
     "productName": "CS2 Visual Hub",
-    "directories": { "output": "release" },
-    "files": ["desktop.js", "server.js", "public/**/*", "package.json", ".env", "node_modules/**/*"],
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop.js",
+      "server.js",
+      "public/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
     "asar": true,
-    "win": { "target": ["nsis"], "artifactName": "CS2-Visual-Hub-Setup.${ext}" },
-    "nsis": { "oneClick": true, "perMachine": false, "allowToChangeInstallationDirectory": false, "createDesktopShortcut": true, "createStartMenuShortcut": true }
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "CS2-Visual-Hub-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
