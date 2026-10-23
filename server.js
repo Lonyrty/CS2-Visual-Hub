@@ -22,7 +22,7 @@ const stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.i
 const baseUrl = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const ownerName = (process.env.OWNER_USERNAME || 'lonyrty').toLowerCase();
 const currency = (process.env.CURRENCY || 'eur').toLowerCase();
-const dbDir = path.join(__dirname, 'data'); fs.mkdirSync(dbDir, {recursive:true});
+const dbDir = process.env.DATA_DIR || path.join(__dirname, 'data'); fs.mkdirSync(dbDir, {recursive:true});
 const db = new Database(path.join(dbDir, 'hub.sqlite'));
 db.pragma('journal_mode = WAL');
 db.exec(`CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password_hash TEXT NOT NULL, created_at INTEGER NOT NULL, subscription_until INTEGER, lifetime INTEGER NOT NULL DEFAULT 0);
