@@ -69,7 +69,7 @@ app.post('/webhook', express.raw({type:'application/json'}), (req,res) => {
   try { processEvent(); return res.json({received:true}); }
   catch(e) { console.error('Webhook processing failed:',e); return res.status(500).send('Webhook processing failed'); }
 });
-app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],styleSrc:["'self'","'unsafe-inline'"],scriptSrc:["'self'","'unsafe-inline'"],imgSrc:["'self'","data:"],connectSrc:["'self'"],formAction:["'self'","https://checkout.stripe.com"],frameAncestors:["'none'"]}}}));
+app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],styleSrc:["'self'","'unsafe-inline'"],scriptSrc:["'self'"],scriptSrcAttr:["'unsafe-inline'"],imgSrc:["'self'","data:"],connectSrc:["'self'"],formAction:["'self'","https://checkout.stripe.com"],frameAncestors:["'none'"]}}}));
 app.use(express.json({limit:'20kb'}));
 app.use(session({store:new SQLiteStore({db:'sessions.sqlite',dir:dbDir}),secret:process.env.SESSION_SECRET,resave:false,saveUninitialized:false,cookie:{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:7*86400000}}));
 app.use('/api', rateLimit({windowMs:15*60*1000,limit:100,standardHeaders:true,legacyHeaders:false}));
