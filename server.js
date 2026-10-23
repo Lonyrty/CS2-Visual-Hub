@@ -16,6 +16,8 @@ for (const k of required) if (!process.env[k] || process.env[k].includes('replac
 }
 if (process.env.SESSION_SECRET.length < 32) { console.error('SESSION_SECRET must be at least 32 characters.'); process.exit(1); }
 const app = express();
+// Render runs behind a reverse proxy; trust it so secure session cookies work over HTTPS.
+app.set('trust proxy', 1);
 const stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('replace_me') ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const baseUrl = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 const ownerName = (process.env.OWNER_USERNAME || 'lonyrty').toLowerCase();
