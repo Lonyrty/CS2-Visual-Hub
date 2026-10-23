@@ -1,0 +1,19 @@
+CS2 VISUAL HUB — РАЗМЕЩЕНИЕ НА RENDER
+
+1. Открой Render и выбери New → Blueprint или создай Web Service из GitHub.
+2. Подключи репозиторий Lonyrty/CS2-Visual-Hub. Конфигурация находится в render.yaml.
+3. Укажи обязательные переменные окружения в Render:
+   SESSION_SECRET — случайная строка не короче 32 символов;
+   OWNER_PASSWORD — новый сильный пароль администратора (не отправляй его в чат);
+   STRIPE_SECRET_KEY — тестовый ключ sk_test_... из Stripe;
+   STRIPE_WEBHOOK_SECRET — whsec_... из Stripe;
+   BASE_URL — публичный HTTPS-адрес сервиса.
+4. Нажми Deploy и дождись завершения сборки.
+5. В Stripe Dashboard → Developers → Webhooks добавь endpoint https://ТВОЙ-ДОМЕН/webhook и события checkout.session.completed и checkout.session.async_payment_succeeded. Сохрани signing secret в STRIPE_WEBHOOK_SECRET.
+6. Настрой цены в евроцентах: PRICE_7D_CENTS, PRICE_30D_CENTS, PRICE_90D_CENTS, PRICE_LIFETIME_CENTS. Пустое значение отключает тариф.
+7. Сначала проверь тестовые платежи; не включай live-ключи, пока не проверены настройки.
+
+ВАЖНО:
+- Не добавляй .env, пароли или ключи в GitHub. В репозитории есть только .env.example.
+- Текущая конфигурация использует SQLite в папке data/. На бесплатном Render данные могут потеряться при перезапуске или новом развёртывании без постоянного диска/базы данных. Для настоящих пользователей и платежей сначала настрой постоянное хранилище.
+- Render публикует веб-приложение по HTTPS; это не готовый Windows EXE.
