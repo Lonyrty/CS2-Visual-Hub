@@ -12,7 +12,7 @@ on:
       - '.github/workflows/build-windows.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-windows:
@@ -33,10 +33,25 @@ jobs:
       - name: Build Windows installer
         run: npm run dist
 
-      - name: Upload installer
+      - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: CS2-Visual-Hub-Windows-Installer
           path: release/*.exe
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: CS2 Visual Hub v1.0.${{ github.run_number }}
+          body: |
+            Windows installer for CS2 Visual Hub.
+
+            - Press F8 to show or hide the companion overlay.
+            - Press Esc to hide the overlay.
+            - The app uses a separate desktop window and does not inject into CS2.
+          files: release/*.exe
+          fail_on_unmatched_files: true
+          generate_release_notes: true
