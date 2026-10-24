@@ -11,6 +11,10 @@ on:
       - 'package.json'
       - '.github/workflows/build-windows.yml'
 
+concurrency:
+  group: windows-installer-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
