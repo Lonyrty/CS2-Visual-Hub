@@ -18,7 +18,8 @@ async function createOverlay() {
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true }
   });
   const area = screen.getPrimaryDisplay().workArea;
-  overlayWindow.setPosition(Math.max(area.x, area.x + area.width - 540), area.y + 24);\n  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  overlayWindow.setPosition(Math.max(area.x, area.x + area.width - 540), area.y + 24);
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
   overlayWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https://')) shell.openExternal(url);
     return { action: 'deny' };
