@@ -1,13 +1,15 @@
 # CS2 Visual Hub
 
-CS2 Visual Hub is a community visual gallery and poster creator, with a Windows companion overlay. It is not a cheat and does not inject into or modify Counter-Strike 2.
+CS2 Visual Hub is a website plus a Windows desktop companion app. The desktop app opens its dedicated **Desktop Visual Lab** at `/desktop.html` on the shared cloud service, so the website and app use the same server-side accounts and preset library. It does not create a separate local owner account or local copy of the app database.
 
-## Windows overlay
+## Windows desktop app
 
-- **F8** toggles the overlay window.
-- **Esc** hides it.
-- The window is borderless and stays on top of other windows.
-- This is a separate desktop overlay, not an interface injected into the CS2 process. Some games using exclusive fullscreen or anti-cheat policies may prevent overlays from appearing; use borderless-window mode if needed.
+- The app connects to `https://cs2-visual-hub-1.onrender.com` by default.
+- Optional override: set `CS2_VISUAL_HUB_URL` in the environment before starting the app.
+- Press **F8** to show or hide the app window.
+- Sign in with the same account used on the website.
+- Visual presets are saved to the shared server and can be listed, loaded, and deleted from the desktop app.
+- The app is a separate desktop window; it does not inject into the CS2 process. Some games using exclusive fullscreen or anti-cheat policies may prevent overlays from appearing; use borderless-window mode if needed.
 
 ## Build the Windows installer
 
@@ -15,21 +17,20 @@ Requirements: Windows, Node.js 22.x, npm.
 
 1. Clone this repository.
 2. Run `npm install`.
-3. Configure the server environment in a local `.env` file. Keep secrets private; never commit `.env` to GitHub.
-4. Run `npm run dist`.
-5. The installer will be written to `release/CS2-Visual-Hub-Setup.exe`.
+3. Run `npm run dist`.
+4. The installer will be written to `release/CS2-Visual-Hub-Setup.exe`.
 
-The desktop app currently starts the local Express server at `http://127.0.0.1:3000`, so its environment must be configured before first launch. Set a unique `SESSION_SECRET` and `OWNER_PASSWORD`. Stripe can be left unconfigured if payment is not needed.
+The app requires an internet connection to reach the configured Hub service. It no longer starts a second local Express server or creates a separate local account database.
 
 ## Website on Render
 
-Start command: `npm start`. The web service runs `server.js`. Keep deployment secrets in Render Environment, not in repository files.
+Start command: `npm start`. The web service runs `server.js`. Keep deployment secrets in Render Environment, not in repository files. The desktop preset API stores each user's presets in the same SQLite database used by the website.
 
-## Current capabilities
+## Current capabilities and limitations
 
-- Neon visual gallery with style filters.
-- Poster creator with editable title, subtitle, accent color, background, and SVG export.
-- User profiles, player search, friends/chat, subscription and admin interfaces, subject to backend configuration.
+- Website visual gallery, poster creator, profiles, player search, friends/chat, subscriptions and admin interfaces, subject to backend configuration.
+- Desktop Visual Lab with crosshair tuning, CFG export, JSON export, and cloud-synced visual preset save/load/delete.
+- The preview for skins/sky/lighting is illustrative. Presets do not automatically change weapon finishes, skyboxes, or other assets in standard CS2 matchmaking. The app is not a cheat and does not inject into or modify Counter-Strike 2.
 
 ## Security notes
 
