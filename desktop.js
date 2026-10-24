@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, shell, globalShortcut } = require('electron');
+const { app, BrowserWindow, dialog, shell, globalShortcut, screen } = require('electron');
 
 let overlayWindow;
 const HUB_URL = (process.env.CS2_VISUAL_HUB_URL || 'https://cs2-visual-hub-1.onrender.com').replace(/\/$/, '');
@@ -17,7 +17,7 @@ async function createOverlay() {
     title: 'CS2 Visual Hub — In-game companion',
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true }
   });
-  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  const area = screen.getPrimaryDisplay().workArea;\n  overlayWindow.setPosition(Math.max(area.x, area.x + area.width - 540), area.y + 24);\n  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
   overlayWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https://')) shell.openExternal(url);
     return { action: 'deny' };
