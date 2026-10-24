@@ -29,6 +29,8 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+      - name: Check JavaScript syntax
+        run: node --check server.js && node --check desktop.js && node --check public/app.js && node --check public/desktop-app.js
 
       - name: Build Windows installer
         run: npm run dist
