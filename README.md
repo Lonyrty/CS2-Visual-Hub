@@ -1,15 +1,15 @@
 # CS2 Visual Hub
 
-CS2 Visual Hub is a website plus a Windows desktop companion app. The desktop app opens its dedicated **Desktop Visual Lab** at `/desktop.html` on the shared cloud service, so the website and app use the same server-side accounts and preset library. It does not create a separate local owner account or local copy of the app database.
+CS2 Visual Hub is a website plus a Windows desktop companion app. The website includes a visual-concept editor, crosshair builder, poster studio, gallery, user profiles, friends/chat, subscriptions and admin tools.
 
-## Windows desktop app
+## Windows companion overlay
 
-- The app connects to `https://cs2-visual-hub-1.onrender.com` by default.
-- Optional override: set `CS2_VISUAL_HUB_URL` in the environment before starting the app.
-- Press **F8** to show or hide the app window.
-- Sign in with the same account used on the website.
-- Visual presets are saved to the shared server and can be listed, loaded, and deleted from the desktop app.
-- The app is a separate desktop window; it does not inject into the CS2 process. Some games using exclusive fullscreen or anti-cheat policies may prevent overlays from appearing; use borderless-window mode if needed.
+- Connects to `https://cs2-visual-hub-1.onrender.com` by default; set `CS2_VISUAL_HUB_URL` to override it.
+- Press **F8** to show or hide the compact always-on-top companion panel.
+- Press **Esc** to hide it.
+- Sign in with the same account used on the website. The app has a dedicated Desktop Visual Lab rather than loading the homepage.
+- The shared preset library is stored server-side; saved presets are available from both the website and the desktop app.
+- To see the panel over CS2, run the game in **borderless windowed** mode. Some systems or exclusive-fullscreen configurations may place the game above ordinary desktop windows. This is a normal desktop overlay, not an injected game overlay.
 
 ## Build the Windows installer
 
@@ -20,19 +20,20 @@ Requirements: Windows, Node.js 22.x, npm.
 3. Run `npm run dist`.
 4. The installer will be written to `release/CS2-Visual-Hub-Setup.exe`.
 
-The app requires an internet connection to reach the configured Hub service. It no longer starts a second local Express server or creates a separate local account database.
+The desktop app requires an internet connection to reach the configured Hub service. It does not create a separate local Express server or local account database.
 
 ## Website on Render
 
-Start command: `npm start`. The web service runs `server.js`. Keep deployment secrets in Render Environment, not in repository files. The desktop preset API stores each user's presets in the same SQLite database used by the website.
+Start command: `npm start`. The web service runs `server.js`. Keep deployment secrets in Render Environment, not in repository files. The visual preset API stores each user's presets in the same database used by the website.
 
-## Current capabilities and limitations
+## Current capabilities and limits
 
-- Website visual gallery, poster creator, profiles, player search, friends/chat, subscriptions and admin interfaces, subject to backend configuration.
-- Desktop Visual Lab with crosshair tuning, CFG export, JSON export, and cloud-synced visual preset save/load/delete.
-- The preview for skins/sky/lighting is illustrative. Presets do not automatically change weapon finishes, skyboxes, or other assets in standard CS2 matchmaking. The app is not a cheat and does not inject into or modify Counter-Strike 2.
+- Crosshair builder generates CS2 console commands and a downloadable `.cfg`; the user applies these in CS2 manually.
+- Visual-concept editor previews weapon finish, environment, sky, lighting and viewmodel styles and exports JSON settings.
+- Poster Studio exports editable SVG.
+- Website and desktop app share a per-account cloud preset library.
+- The app is a companion overlay, not a cheat. It does not inject into or modify the CS2 process. The visual skin/sky preview does not apply custom finishes or skyboxes to ordinary official matchmaking. Use Valve's official Workshop tools for actual custom content.
 
-## Security notes
+## Protecting accounts
 
-- Never commit credentials, API keys, payment secrets, or production session secrets.
-- Do not package a local `.env` file in the installer.
+Existing account/profile data and the `lonyrty` owner account are managed by the existing server database. These UI and preset changes do not edit profile fields or reset passwords. Never commit credentials, API keys, payment secrets, or production session secrets.
