@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:"><title>CS2 Visual Hub — Desktop Lab</title><link rel="stylesheet" href="/desktop.css"></head>
+<body><header><div class="brand"><span class="mark">CS</span><div><strong>CS2 VISUAL HUB</strong><small>DESKTOP VISUAL LAB</small></div></div><div class="session"><span id="status">Подключение…</span><button id="logout" class="ghost hidden">Выйти</button></div></header>
+<main><section id="authPanel" class="panel auth hidden"><div class="eyebrow">CLOUD ACCOUNT</div><h1>Войди в свой Hub</h1><p class="muted">Используй тот же аккаунт, что и на сайте. Пресеты будут храниться на общем сервере.</p><form id="loginForm"><label>Логин<input id="username" autocomplete="username" required minlength="3"></label><label>Пароль<input id="password" type="password" autocomplete="current-password" required></label><button class="primary" type="submit">Войти</button><p id="authMsg" class="msg"></p></form></section>
+<div id="workspace" class="hidden"><section class="hero"><div><div class="eyebrow">PERSONAL CONFIGURATION</div><h1>Visual Lab<span>.</span></h1><p>Собирай визуальные настройки, сохраняй их в облаке и переноси в игру через CFG. Это отдельное приложение, не просто главная страница сайта.</p></div><div class="live"><i></i> CLOUD SYNC <b>ON</b></div></section>
+<div class="layout"><section class="panel editor"><div class="sectionHead"><div><div class="eyebrow">01 / CROSSHAIR</div><h2>Прицел</h2></div><div class="cross-preview"><span id="crosshair"></span></div></div>
+<div class="field"><label for="size">Размер <output id="sizeOut">2</output></label><input id="size" type="range" min="0.5" max="6" step="0.5" value="2"></div>
+<div class="field"><label for="gap">Отступ <output id="gapOut">-2</output></label><input id="gap" type="range" min="-5" max="2" step="1" value="-2"></div>
+<div class="field"><label for="thickness">Толщина <output id="thicknessOut">1</output></label><input id="thickness" type="range" min="0.5" max="3" step="0.5" value="1"></div>
+<div class="field"><label for="alpha">Прозрачность <output id="alphaOut">255</output></label><input id="alpha" type="range" min="50" max="255" step="5" value="255"></div>
+<div class="field"><label for="color">Цвет</label><select id="color"><option value="1">Красный</option><option value="2">Зелёный</option><option value="3">Жёлтый</option><option value="4">Голубой</option><option value="5">Пользовательский</option></select></div>
+<div class="actions"><button id="copyCfg" class="primary">Скопировать CFG</button><button id="downloadCfg" class="ghost">Скачать .cfg</button></div><textarea id="cfg" readonly spellcheck="false"></textarea>
+</section>
+<section class="panel editor"><div class="sectionHead"><div><div class="eyebrow">02 / VISUAL PRESET</div><h2>Визуальный профиль</h2></div><span class="tag">JSON</span></div>
+<p class="muted">Сохраняет твои настройки и заметки как облачный профиль. Настройки скинов и неба здесь — описание пресета/предпросмотр, они не применяются автоматически к обычному матчмейкингу CS2.</p>
+<div class="field"><label for="presetName">Название пресета</label><input id="presetName" maxlength="48" placeholder="Например, Neon Green"></div>
+<div class="field"><label for="accent">Акцент предпросмотра</label><input id="accent" type="color" value="#b7ff3c"></div>
+<div class="field"><label for="sky">Стиль окружения</label><select id="sky"><option value="default">Classic</option><option value="night">Night</option><option value="neon">Neon</option><option value="ice">Ice</option><option value="sunset">Sunset</option></select></div>
+<div class="preview" id="scene"><div class="sun"></div><div class="horizon"></div><div class="weapon">✦</div><span>VISUAL PREVIEW</span></div>
+<div class="actions"><button id="savePreset" class="primary">Сохранить в облако</button><button id="exportJson" class="ghost">Экспорт JSON</button></div><p id="presetMsg" class="msg"></p>
+</section></div>
+<section class="panel saved"><div class="sectionHead"><div><div class="eyebrow">03 / CLOUD LIBRARY</div><h2>Мои пресеты</h2></div><button id="refreshPresets" class="ghost">Обновить</button></div><div id="presets" class="presets"><p class="muted">Загрузка…</p></div></section>
+<footer>CS2 Visual Hub · Войдите в тот же аккаунт, чтобы синхронизировать данные с сайтом. Для применения CFG в игре проверь команды и настройки перед использованием.</footer></div></main><script src="/desktop-app.js"></script></body></html>
