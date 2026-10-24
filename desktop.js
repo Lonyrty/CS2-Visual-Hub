@@ -11,11 +11,13 @@ function toggleOverlay() {
 }
 async function createOverlay() {
   overlayWindow = new BrowserWindow({
-    width: 1180, height: 860, minWidth: 760, minHeight: 600,
-    show: false, frame: true, backgroundColor: '#090c0d',
-    autoHideMenuBar: true, title: 'CS2 Visual Hub — Desktop Visual Lab',
+    width: 520, height: 820, minWidth: 420, minHeight: 620,
+    show: false, frame: false, transparent: true, backgroundColor: '#00000000',
+    alwaysOnTop: true, skipTaskbar: false, autoHideMenuBar: true,
+    title: 'CS2 Visual Hub — In-game companion',
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true }
   });
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
   overlayWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https://')) shell.openExternal(url);
     return { action: 'deny' };
@@ -23,7 +25,10 @@ async function createOverlay() {
   overlayWindow.webContents.on('will-navigate', (event, url) => {
     if (!url.startsWith(HUB_URL)) { event.preventDefault(); if (url.startsWith('https://')) shell.openExternal(url); }
   });
-  overlayWindow.webContents.on('did-fail-load', async (_event, code, description, validatedURL, isMainFrame) => {
+  overlayWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'Escape' && input.type === 'keyDown') { event.preventDefault(); overlayWindow.hide(); }
+  });
+  overlayWindow.webContents.on('did-fail-load', async (_event, code, description, _validatedURL, isMainFrame) => {
     if (isMainFrame && code !== -3) {
       await dialog.showMessageBox(overlayWindow, {
         type: 'warning', title: 'CS2 Visual Hub — нет соединения',
