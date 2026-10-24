@@ -57,7 +57,8 @@ async function saveCrosshairCloudPreset(){
 async function applyCloudPreset(id){
  try{const d=await api('/api/presets');const p=d.presets.find(x=>Number(x.id)===Number(id));if(!p)throw Error('Пресет не найден.');const data=p.data||{};
  if(data.settings){Object.entries(data.settings).forEach(([id,val])=>{const el=$(id);if(!el)return;if(el.type==='checkbox')el.checked=!!val;else el.value=val});if($('vlabStage'))updateVisualLab()}
- if(data.crosshair){const c=data.crosshair; if($('crosshairColor'))$('crosshairColor').value=c.color||'#baff3b';if($('crosshairSize'))$('crosshairSize').value=c.size||3;if($('crosshairThickness'))$('crosshairThickness').value=c.thickness||1;if($('crosshairGap'))$('crosshairGap').value=c.gap??2;if($('crosshairDot'))$('crosshairDot').checked=!!c.dot;if($('crosshairOutline'))$('crosshairOutline').checked=c.outline!==false;updateCrosshair()}
+ if(data.visual){if(data.visual.accent&&$('vlabAccent'))$('vlabAccent').value=data.visual.accent;if(data.visual.sky&&$('vlabSky')){const skyMap={default:'clear',night:'night',neon:'purple',ice:'arctic',sunset:'sunset'};$('vlabSky').value=skyMap[data.visual.sky]||'clear'}if($('vlabStage'))updateVisualLab()}
+ if(data.crosshair){const c=data.crosshair; const colorMap={1:'#ff0000',2:'#00ff00',3:'#ffff00',4:'#00ffff',5:'#baff3b'}; if($('crosshairColor'))$('crosshairColor').value=(typeof c.color==='number'?colorMap[c.color]:(c.color||'#baff3b'));if($('crosshairSize'))$('crosshairSize').value=c.size||3;if($('crosshairThickness'))$('crosshairThickness').value=c.thickness||1;if($('crosshairGap'))$('crosshairGap').value=c.gap??2;if($('crosshairDot'))$('crosshairDot').checked=!!c.dot;if($('crosshairOutline'))$('crosshairOutline').checked=c.outline!==false;updateCrosshair()}
  $('cloudPresetName').value=p.name;say('Загружен пресет: '+p.name,'cloudPresetMsg');
  }catch(e){say(e.message,'cloudPresetMsg')}
 }
