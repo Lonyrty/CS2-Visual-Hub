@@ -1,94 +1,43 @@
 const { app, BrowserWindow, dialog, shell, globalShortcut } = require('electron');
-const path = require('path');
-const fs = require('fs');
-const http = require('http');
-const crypto = require('crypto');
 
 let overlayWindow;
-let generatedOwnerPassword = null;
+const HUB_URL = (process.env.CS2_VISUAL_HUB_URL || 'https://cs2-visual-hub-1.onrender.com').replace(/\/$/, '');
 
-function waitForServer(url, tries = 60) {
-  return new Promise((resolve, reject) => {
-    const check = left => {
-      const req = http.get(url, res => { res.resume(); resolve(); });
-      req.on('error', () => {
-        if (left <= 0) reject(new Error('Сервер не запустился'));
-        else setTimeout(() => check(left - 1), 300);
-      });
-      req.setTimeout(700, () => req.destroy());
-    };
-    check(tries);
-  });
-}
 function toggleOverlay() {
   if (!overlayWindow || overlayWindow.isDestroyed()) return;
-  if (overlayWindow.isVisible()) overlayWindow.hide();
-  else { overlayWindow.show(); overlayWindow.focus(); }
+  if (overlayWindow.isVisible()) { overlayWindow.hide(); return; }
+  overlayWindow.show();
+  overlayWindow.focus();
 }
 async function createOverlay() {
-  const userDir = app.getPath('userData');
-  const envPath = path.join(userDir, '.env');
-  const dataDir = path.join(userDir, 'data');
-  fs.mkdirSync(dataDir, { recursive: true });
-
-  if (!fs.existsSync(envPath)) {
-    generatedOwnerPassword = crypto.randomBytes(18).toString('base64url');
-    const sessionSecret = crypto.randomBytes(48).toString('hex');
-    const env = [
-      'PORT=3000',
-      'BASE_URL=http://localhost:3000',
-      'SESSION_SECRET=' + sessionSecret,
-      'OWNER_USERNAME=lonyrty',
-      'OWNER_PASSWORD=' + generatedOwnerPassword,
-      'CURRENCY=eur',
-      ''
-    ].join('\n');
-    fs.writeFileSync(envPath, env, { mode: 0o600 });
-  }
-
-  process.env.DATA_DIR = dataDir;
-  process.env.PORT = '3000';
-  process.chdir(userDir);
-  require('dotenv').config({ path: envPath, override: true });
-  process.env.DATA_DIR = dataDir;
-  process.env.PORT = '3000';
-
-  try { require('./server.js'); }
-  catch (e) { await dialog.showErrorBox('Не удалось запустить CS2 Visual Hub', e.message); app.quit(); return; }
-  try { await waitForServer('http://127.0.0.1:3000'); }
-  catch (e) { await dialog.showErrorBox('Ошибка запуска', 'Локальный сервер не запустился. Закрой программы, использующие порт 3000, и попробуй снова.'); app.quit(); return; }
-
   overlayWindow = new BrowserWindow({
-    width: 1050, height: 760, minWidth: 780, minHeight: 560,
-    show: false, frame: false, transparent: true, backgroundColor: '#00000000',
-    alwaysOnTop: true, skipTaskbar: false, autoHideMenuBar: true,
+    width: 1180, height: 860, minWidth: 760, minHeight: 600,
+    show: false, frame: true, backgroundColor: '#090c0d',
+    autoHideMenuBar: true, title: 'CS2 Visual Hub — Desktop Visual Lab',
     webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true }
   });
-  overlayWindow.loadURL('http://127.0.0.1:3000');
   overlayWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https://')) shell.openExternal(url);
     return { action: 'deny' };
   });
-  overlayWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'Escape' && input.type === 'keyDown') { event.preventDefault(); overlayWindow.hide(); }
+  overlayWindow.webContents.on('will-navigate', (event, url) => {
+    if (!url.startsWith(HUB_URL)) { event.preventDefault(); if (url.startsWith('https://')) shell.openExternal(url); }
   });
-  overlayWindow.once('ready-to-show', async () => {
-    overlayWindow.show();
-    if (generatedOwnerPassword) {
-      await dialog.showMessageBox({
-        type: 'info',
-        title: 'CS2 Visual Hub — данные входа',
-        message: 'Локальный аккаунт владельца создан.',
-        detail: 'Логин: lonyrty\nПароль: ' + generatedOwnerPassword + '\n\nСохрани пароль: он хранится в настройках приложения на этом компьютере.'
+  overlayWindow.webContents.on('did-fail-load', async (_event, code, description, validatedURL, isMainFrame) => {
+    if (isMainFrame && code !== -3) {
+      await dialog.showMessageBox(overlayWindow, {
+        type: 'warning', title: 'CS2 Visual Hub — нет соединения',
+        message: 'Не удалось открыть облачный Visual Lab.',
+        detail: 'Проверь интернет и адрес сервера: ' + HUB_URL + '\n' + description
       });
-      generatedOwnerPassword = null;
     }
   });
+  await overlayWindow.loadURL(HUB_URL + '/desktop.html');
+  overlayWindow.once('ready-to-show', () => overlayWindow && overlayWindow.show());
   overlayWindow.on('closed', () => { overlayWindow = null; });
 }
 app.whenReady().then(async () => {
   await createOverlay();
-  if (!overlayWindow) return;
   const registered = globalShortcut.register('F8', toggleOverlay);
   if (!registered) dialog.showMessageBox({ type: 'warning', title: 'CS2 Visual Hub', message: 'Не удалось зарегистрировать F8. Возможно, клавиша занята другой программой.' });
 });
