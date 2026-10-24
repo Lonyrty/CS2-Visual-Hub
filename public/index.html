@@ -37,7 +37,7 @@
 <div class="topline"></div>
 <header class="site-header"><div class="wrap nav">
 <a class="brand" href="#top" aria-label="CS2 Visual Hub home"><span class="brand-mark">V</span> CS2 <span>VISUAL HUB</span></a>
-<nav class="nav-links" aria-label="Основная навигация"><a href="#visual-lab">Visual Lab</a><a href="#visuals">Прицел / HUD</a><a href="#gallery">Галерея</a><a href="#download">Приложение</a><a href="#community">Профиль</a></nav>
+<nav class="nav-links" aria-label="Основная навигация"><a href="#visual-lab">Visual Lab</a><a href="#visuals">Прицел / HUD</a><a href="#cloud-presets">Мои пресеты</a><a href="#gallery">Галерея</a><a href="#download">Приложение</a><a href="#community">Профиль</a></nav>
 <div class="nav-actions"><span id="who" class="muted">Гость</span><button id="logout" class="hidden" onclick="logout()">Выйти</button><a class="btn secondary" href="#auth">Войти ↗</a></div>
 </div></header>
 <main id="top">
@@ -58,6 +58,8 @@
 <div class="vlab-panel" data-vpanel="world"><h3>Environment presets</h3><p>Быстро переключай сцену и характер окружения.</p><label class="vlab-field">Сцена<select id="vlabMap" onchange="updateVisualLab()"><option value="dust">Dust II — песок и камень</option><option value="mirage">Mirage — тёплый город</option><option value="inferno">Inferno — зелень и кирпич</option><option value="nuke">Nuke — холодный индустриальный</option></select></label><label class="vlab-field">Контраст <span id="vlabContrastValue">100%</span><input id="vlabContrast" type="range" min="60" max="140" value="100" oninput="updateVisualLab()"></label></div>
 <div class="vlab-actions"><button class="primary" onclick="downloadVisualPreset()">Экспорт пресета JSON ↓</button><button onclick="resetVisualLab()">Сбросить</button></div><div id="vlabMsg" class="msg" role="status"></div></div></div>
 <div class="vlab-disclaimer" style="margin-top:14px"><b>Важно:</b> скин и небо здесь — настраиваемый предпросмотр. Сайт не может безопасно включить пользовательские скины или заменить небо в официальном матче одной кнопкой. Для реального контента CS2 используй официальный Workshop Workbench и Workshop Tools. Экспорт сохраняет параметры концепта, а не внедряет файлы в игру.</div>
+<div class="panel" id="cloud-presets" style="margin-top:22px"><div class="dashboard-head"><div><div class="eyebrow">CLOUD LIBRARY / SYNC</div><h2>Мои визуальные пресеты</h2><p class="muted">Одна библиотека для сайта и Desktop Visual Lab. Войди в аккаунт, чтобы сохранить или открыть свои настройки.</p></div><button onclick="loadCloudPresets()">Обновить ↻</button></div>
+<div class="auth-grid" style="align-items:end"><label class="field">Название пресета<input id="cloudPresetName" maxlength="48" placeholder="Например, Neon Mirage"></label><div class="row"><button class="primary" onclick="saveCloudPreset()">Сохранить текущие визуалы</button><button onclick="saveCrosshairCloudPreset()">Сохранить прицел</button></div></div><p id="cloudPresetMsg" class="msg"></p><div id="cloudPresetList" class="players"><p class="note">Войдите в аккаунт, чтобы загрузить облачную библиотеку.</p></div></div>
 </section>
 
 <section class="wrap section" id="visuals">
