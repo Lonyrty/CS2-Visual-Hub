@@ -29,7 +29,8 @@ db.exec(`CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password_h
 CREATE TABLE IF NOT EXISTS payments (session_id TEXT PRIMARY KEY, username TEXT NOT NULL, plan TEXT NOT NULL, amount INTEGER NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL, created_at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS webhook_events (event_id TEXT PRIMARY KEY, received_at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS friendships (id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, to_user TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', created_at INTEGER NOT NULL, UNIQUE(from_user,to_user));
-CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, to_user TEXT NOT NULL, body TEXT NOT NULL, created_at INTEGER NOT NULL);`);
+CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, to_user TEXT NOT NULL, body TEXT NOT NULL, created_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS visual_presets (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, name TEXT NOT NULL, data TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, UNIQUE(username,name));`);
 try { db.exec("ALTER TABLE users ADD COLUMN steam_url TEXT NOT NULL DEFAULT ''"); } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN bio TEXT NOT NULL DEFAULT ''"); } catch(e) {}
 const owner = db.prepare('SELECT username FROM users WHERE username=?').get(ownerName);
@@ -95,6 +96,34 @@ app.post('/api/friends/request',auth,(req,res)=>{const me=req.session.username,t
 app.post('/api/friends/respond',auth,(req,res)=>{const me=req.session.username,target=String(req.body.username||'').toLowerCase(),accept=!!req.body.accept;const r=db.prepare("SELECT id FROM friendships WHERE from_user=? AND to_user=? AND status='pending'").get(target,me);if(!r)return res.status(404).json({error:'Заявка не найдена.'});if(accept)db.prepare("UPDATE friendships SET status='accepted' WHERE id=?").run(r.id);else db.prepare('DELETE FROM friendships WHERE id=?').run(r.id);res.json({ok:true});});
 app.get('/api/chat/:username',auth,(req,res)=>{const me=req.session.username,other=String(req.params.username||'').toLowerCase();const ok=db.prepare("SELECT id FROM friendships WHERE status='accepted' AND ((from_user=? AND to_user=?) OR (from_user=? AND to_user=?))").get(me,other,other,me);if(!ok)return res.status(403).json({error:'Чат доступен только друзьям.'});const messages=db.prepare('SELECT id,from_user AS fromUser,to_user AS toUser,body,created_at AS createdAt FROM messages WHERE (from_user=? AND to_user=?) OR (from_user=? AND to_user=?) ORDER BY id DESC LIMIT 100').all(me,other,other,me).reverse();res.json({messages});});
 app.post('/api/chat/:username',auth,(req,res)=>{const me=req.session.username,other=String(req.params.username||'').toLowerCase(),body=String(req.body.body||'').trim();if(!body||body.length>1000)return res.status(400).json({error:'Сообщение должно содержать 1–1000 символов.'});const ok=db.prepare("SELECT id FROM friendships WHERE status='accepted' AND ((from_user=? AND to_user=?) OR (from_user=? AND to_user=?))").get(me,other,other,me);if(!ok)return res.status(403).json({error:'Чат доступен только друзьям.'});const created=Date.now(),info=db.prepare('INSERT INTO messages(from_user,to_user,body,created_at) VALUES(?,?,?,?)').run(me,other,body,created);res.json({message:{id:info.lastInsertRowid,fromUser:me,toUser:other,body,createdAt:created}});});
+// Cloud-synced visual presets: the same signed-in account sees them on the website and desktop app.
+app.get('/api/presets',auth,(req,res)=>{
+  const rows=db.prepare('SELECT id,name,data,created_at AS createdAt,updated_at AS updatedAt FROM visual_presets WHERE username=? ORDER BY updated_at DESC').all(req.session.username);
+  res.json({presets:rows.map(r=>({...r,data:JSON.parse(r.data)}))});
+});
+app.post('/api/presets',auth,(req,res)=>{
+  const name=String(req.body.name||'').trim().slice(0,48);
+  const data=req.body.data;
+  if(!name) return res.status(400).json({error:'Укажи название пресета.'});
+  if(!data||typeof data!=='object'||Array.isArray(data)) return res.status(400).json({error:'Некорректные настройки пресета.'});
+  const encoded=JSON.stringify(data);
+  if(encoded.length>12000) return res.status(413).json({error:'Пресет слишком большой.'});
+  const now=Date.now();
+  try {
+    const info=db.prepare('INSERT INTO visual_presets(username,name,data,created_at,updated_at) VALUES(?,?,?,?,?)').run(req.session.username,name,encoded,now,now);
+    res.status(201).json({preset:{id:info.lastInsertRowid,name,data,createdAt:now,updatedAt:now}});
+  } catch(e) {
+    if(String(e.code||'').startsWith('SQLITE_CONSTRAINT')) return res.status(409).json({error:'Пресет с таким названием уже существует. Удали старый или выбери другое имя.'});
+    console.error('Preset save failed:',e); return res.status(500).json({error:'Не удалось сохранить пресет.'});
+  }
+});
+app.delete('/api/presets/:id',auth,(req,res)=>{
+  const id=Number(req.params.id);
+  if(!Number.isSafeInteger(id)||id<1) return res.status(400).json({error:'Некорректный ID пресета.'});
+  const info=db.prepare('DELETE FROM visual_presets WHERE id=? AND username=?').run(id,req.session.username);
+  if(!info.changes) return res.status(404).json({error:'Пресет не найден.'});
+  res.json({ok:true});
+});
 app.get('/api/admin/users',auth,ownerOnly,(req,res)=>res.json({users:db.prepare('SELECT username,created_at,subscription_until,lifetime FROM users ORDER BY created_at DESC').all().map(publicUser)}));
 app.post('/api/admin/grant',auth,ownerOnly,(req,res)=>{const username=String(req.body.username||'').toLowerCase();const days=Number(req.body.days);const u=userRow(username);if(!u)return res.status(404).json({error:'Пользователь не найден.'});if(username===ownerName)return res.status(400).json({error:'Владелец уже имеет пожизненный доступ.'});if(days===0)db.prepare('UPDATE users SET lifetime=1,subscription_until=NULL WHERE username=?').run(username);else if(![7,30,90,365].includes(days))return res.status(400).json({error:'Недопустимый срок.'});else db.prepare('UPDATE users SET subscription_until=?,lifetime=0 WHERE username=?').run(Math.max(Date.now(),Number(u.subscription_until||0))+days*86400000,username);res.json({user:publicUser(userRow(username))});});
 app.get('/api/admin/payments',auth,ownerOnly,(req,res)=>res.json({payments:db.prepare('SELECT session_id,username,plan,amount,currency,status,created_at FROM payments ORDER BY created_at DESC LIMIT 100').all()}));
